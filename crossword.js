@@ -1,140 +1,90 @@
-/**
- * crossword.js
- * Usage: createCrossword(containerId, crosswordData, rows, cols);
- */
+/* Crossword Grid */
+.crossword-grid {
+  display: inline-grid;
+  gap: 2px;
+  background: #fdfcf9; /* soft cream */
+  padding: 10px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
 
-function createCrossword(containerId, crosswordData, rows, cols) {
-  const grid = document.getElementById(containerId);
-  if (!grid) { console.error('createCrossword: container not found', containerId); return; }
-  grid.classList.add("crossword");
-  grid.style.display = "grid";
-  grid.style.gridTemplateColumns = `repeat(${cols}, 40px)`;
-  grid.style.gridAutoRows = "40px";
-  grid.style.gap = "2px";
-  grid.style.margin = "20px 0";
+/* Each cell */
+.crossword-grid .cell {
+  width: 40px;
+  height: 40px;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
 
-  // Build grid
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      let cell = document.createElement("div");
-      cell.classList.add("cell");
-      cell.dataset.row = r;
-      cell.dataset.col = c;
+.crossword-grid .cell input {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  border: none;
+  outline: none;
+  font-size: 18px;
+  font-family: 'Georgia', serif; /* elegant serif font */
+  color: #444;
+  background: transparent;
+  text-transform: uppercase;
+}
 
-      let input = document.createElement("input");
-      input.maxLength = 1;
-      input.style.width = "100%";
-      input.style.height = "100%";
-      input.style.border = "none";
-      input.style.textAlign = "center";
-      input.style.fontSize = "20px";
-      input.style.textTransform = "uppercase";
-      input.autocomplete = "off";
-      input.spellcheck = false;
+/* Clue numbers */
+.crossword-grid .cell::before {
+  content: attr(data-number);
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 10px;
+  color: #999;
+}
 
-      input.addEventListener('input', () => checkAnswers(containerId));
-      cell.appendChild(input);
-      grid.appendChild(cell);
-    }
-  }
+/* Correct vs incorrect */
+.crossword-grid .cell.correct {
+  background: #f9f5f0; /* subtle champagne tone */
+}
 
-  // Place words (set dataset.letter)
-  function placeWord(word, row, col, dir) {
-    const letters = word.toUpperCase().split('');
-    letters.forEach((ch, i) => {
-      const rr = row + (dir === 'down' ? i : 0);
-      const cc = col + (dir === 'across' ? i : 0);
-      const cell = grid.querySelector(`.cell[data-row="${rr}"][data-col="${cc}"]`);
-      if (cell) cell.dataset.letter = ch;
-    });
-  }
+.crossword-grid .cell.incorrect {
+  background: #ffe6e6; /* soft blush red for error */
+}
 
-  Object.values(crosswordData.across || {}).forEach(w =>
-    placeWord(w.answer, w.row, w.col, 'across')
-  );
-  Object.values(crosswordData.down || {}).forEach(w =>
-    placeWord(w.answer, w.row, w.col, 'down')
-  );
+/* Hint highlight */
+.crossword-grid .cell.hint {
+  background: #fff4f9; /* pink tint */
+  border: 1px dashed #e7a2c6;
+}
 
-  // Disable unused cells
-  grid.querySelectorAll('.cell').forEach(cell => {
-    if (!cell.dataset.letter) {
-      cell.classList.add('block');
-      const inp = cell.querySelector('input');
-      inp.disabled = true;
-      inp.style.visibility = 'hidden';
-    }
-  });
+/* Buttons */
+.crossword-controls button {
+  background: #f6f0eb;
+  border: none;
+  padding: 8px 16px;
+  margin: 6px;
+  border-radius: 20px;
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  color: #444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
 
-  // Auto-check function
-  function checkAnswers() {
-    grid.querySelectorAll('.cell').forEach(cell => {
-      const inp = cell.querySelector('input');
-      if (!cell.dataset.letter) return;
-      if (inp.value.toUpperCase() === cell.dataset.letter) {
-        cell.classList.add('correct');
-      } else {
-        cell.classList.remove('correct');
-      }
-    });
-  }
-  // expose for manual check in console if needed
-  window.checkAnswers = checkAnswers;
-  checkAnswers();
+.crossword-controls button:hover {
+  background: #ecd7d2;
+  color: #222;
+}
 
-  // Controls (hint, check, clear)
-  const controls = document.createElement('div');
-  controls.classList.add('crossword-controls');
-
-    let hintsUsed = 0;
-  const maxHints = 3;
-
-  const hintBtn = document.createElement('button');
-  hintBtn.innerText = `Show hint (${maxHints})`;
-
-  hintBtn.onclick = () => {
-    if (hintsUsed >= maxHints) {
-      hintBtn.disabled = true;
-      hintBtn.innerText = "No more hints";
-      return;
-    }
-
-    const candidates = [...grid.querySelectorAll('.cell')].filter(c => c.dataset.letter && c.querySelector('input').value.toUpperCase() !== c.dataset.letter);
-    if (!candidates.length) return;
-
-    const target = candidates[Math.floor(Math.random()*candidates.length)];
-    target.querySelector('input').value = target.dataset.letter;
-    target.classList.add('hint');
-    checkAnswers();
-
-    hintsUsed++;
-    hintBtn.innerText = `Show hint (${maxHints - hintsUsed} left)`;
-
-    if (hintsUsed >= maxHints) {
-      hintBtn.disabled = true;
-    }
-  };
-
-
-  const checkBtn = document.createElement('button');
-  checkBtn.innerText = 'Check all';
-  checkBtn.onclick = checkAnswers;
-
-  const clearBtn = document.createElement('button');
-  clearBtn.innerText = 'Clear';
-  clearBtn.onclick = () => {
-    grid.querySelectorAll('.cell').forEach(cell => {
-      const inp = cell.querySelector('input');
-      if (cell.dataset.letter) {
-        inp.value = '';
-        cell.classList.remove('correct','hint');
-      }
-    });
-  };
-
-  controls.appendChild(hintBtn);
-  controls.appendChild(checkBtn);
-  controls.appendChild(clearBtn);
-
-  grid.after(controls);
+/* Layout for controls */
+.crossword-controls {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
