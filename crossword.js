@@ -86,16 +86,35 @@ function createCrossword(containerId, crosswordData, rows, cols) {
   const controls = document.createElement('div');
   controls.classList.add('crossword-controls');
 
+    let hintsUsed = 0;
+  const maxHints = 3;
+
   const hintBtn = document.createElement('button');
-  hintBtn.innerText = 'Show hint';
+  hintBtn.innerText = `Show hint (${maxHints})`;
+
   hintBtn.onclick = () => {
+    if (hintsUsed >= maxHints) {
+      hintBtn.disabled = true;
+      hintBtn.innerText = "No more hints";
+      return;
+    }
+
     const candidates = [...grid.querySelectorAll('.cell')].filter(c => c.dataset.letter && c.querySelector('input').value.toUpperCase() !== c.dataset.letter);
     if (!candidates.length) return;
+
     const target = candidates[Math.floor(Math.random()*candidates.length)];
     target.querySelector('input').value = target.dataset.letter;
     target.classList.add('hint');
     checkAnswers();
+
+    hintsUsed++;
+    hintBtn.innerText = `Show hint (${maxHints - hintsUsed} left)`;
+
+    if (hintsUsed >= maxHints) {
+      hintBtn.disabled = true;
+    }
   };
+
 
   const checkBtn = document.createElement('button');
   checkBtn.innerText = 'Check all';
