@@ -6,7 +6,7 @@
 function createCrossword(containerId, crosswordData, rows, cols) {
   const grid = document.getElementById(containerId);
   if (!grid) { console.error('createCrossword: container not found', containerId); return; }
-  grid.classList.add("crossword");
+  grid.classList.add("crossword-grid"); // matches CSS
   grid.style.display = "grid";
   grid.style.gridTemplateColumns = `repeat(${cols}, 40px)`;
   grid.style.gridAutoRows = "40px";
@@ -32,7 +32,7 @@ function createCrossword(containerId, crosswordData, rows, cols) {
       input.autocomplete = "off";
       input.spellcheck = false;
 
-      input.addEventListener('input', () => checkAnswers(containerId));
+      input.addEventListener('input', () => checkAnswers());
       cell.appendChild(input);
       grid.appendChild(cell);
     }
@@ -73,8 +73,11 @@ function createCrossword(containerId, crosswordData, rows, cols) {
       if (!cell.dataset.letter) return;
       if (inp.value.toUpperCase() === cell.dataset.letter) {
         cell.classList.add('correct');
+        cell.classList.remove('incorrect');
       } else {
         cell.classList.remove('correct');
+        if (inp.value) cell.classList.add('incorrect'); // highlight wrong letters
+        else cell.classList.remove('incorrect');
       }
     });
   }
@@ -128,7 +131,7 @@ function createCrossword(containerId, crosswordData, rows, cols) {
       const inp = cell.querySelector('input');
       if (cell.dataset.letter) {
         inp.value = '';
-        cell.classList.remove('correct','hint');
+        cell.classList.remove('correct','hint','incorrect');
       }
     });
     hintsUsed = 0;
