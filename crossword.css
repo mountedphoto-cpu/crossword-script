@@ -1,3 +1,7 @@
+/* Google Font already loaded in header:
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+*/
+
 /* Crossword Grid */
 .crossword-grid {
   display: inline-grid;
@@ -29,7 +33,7 @@
   border: none;
   outline: none;
   font-size: 18px;
-  font-family: 'Georgia', serif; /* elegant serif font */
+  font-family: 'Playfair Display', serif;
   color: #444;
   background: transparent;
   text-transform: uppercase;
@@ -67,7 +71,7 @@
   padding: 8px 16px;
   margin: 6px;
   border-radius: 20px;
-  font-family: 'Georgia', serif;
+  font-family: 'Playfair Display', serif;
   font-size: 14px;
   color: #444;
   cursor: pointer;
