@@ -123,21 +123,28 @@ function createCrossword(containerId, crosswordData, rows, cols) {
   checkBtn.innerText = 'Check all';
   checkBtn.onclick = checkAnswers;
 
-  // Clear button
-  const clearBtn = document.createElement('button');
-  clearBtn.innerText = 'Clear';
-  clearBtn.onclick = () => {
-    grid.querySelectorAll('.cell').forEach(cell => {
-      const inp = cell.querySelector('input');
-      if (cell.dataset.letter) {
-        inp.value = '';
-        cell.classList.remove('correct','hint','incorrect');
-      }
-    });
-    hintsUsed = 0;
+ // Clear button
+const clearBtn = document.createElement('button');
+clearBtn.innerText = 'Clear';
+clearBtn.onclick = () => {
+  grid.querySelectorAll('.cell').forEach(cell => {
+    const inp = cell.querySelector('input');
+    if (cell.dataset.letter) {
+      inp.value = '';
+      cell.classList.remove('correct','hint','incorrect');
+    }
+  });
+  // 🚫 Do NOT reset hintsUsed
+  // Just update the button depending on how many hints are left
+  if (hintsUsed < maxHints) {
     hintBtn.disabled = false;
-    hintBtn.innerText = `Show hint (${maxHints})`;
-  };
+    hintBtn.innerText = `Show hint (${maxHints - hintsUsed} left)`;
+  } else {
+    hintBtn.disabled = true;
+    hintBtn.innerText = "No more hints";
+  }
+};
+
 
   controls.appendChild(hintBtn);
   controls.appendChild(checkBtn);
